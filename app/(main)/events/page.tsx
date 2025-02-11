@@ -1,18 +1,22 @@
 import EventPage from "@/components/event/event-page";
-import { getAllEvents } from "@/queries/event.query";
+import { getAllEvents, getAllEventsCategories } from "@/queries/event.query";
 
 export default async function Events({
   searchParams,
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  const { search } = searchParams;
+  const { search, category } = searchParams;
+
   const events = await getAllEvents({
     query: `
       title, capacity, date, location, time, category, id, image 
       `,
     search: (search || "") as string,
+    category: (category || "") as string,
   });
 
-  return <EventPage events={events} />;
+  const categories = await getAllEventsCategories();
+
+  return <EventPage events={events} categories={categories} />;
 }

@@ -11,9 +11,11 @@ import { toast } from "react-toastify";
 export default function EventDetails({
   event,
   session,
+  userId,
 }: {
   event: EVENT_TYPE;
   session: SessionType;
+  userId: string;
 }) {
   const user = session?.user || null;
 
@@ -21,6 +23,12 @@ export default function EventDetails({
   const pathname = usePathname();
 
   const handleRegister = () => {
+    const data = {
+      eventId: event.id,
+      userId: userId,
+    };
+    console.log(data);
+
     if (!user) {
       return router.push("/login?next=" + pathname);
     }

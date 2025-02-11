@@ -4,27 +4,50 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 
 import FeatureCard from "@/components/home/feature-card";
+import useDebounce from "@/hooks/use-debounce";
 import { fadeIn, slideIn, staggerChildren } from "@/utils/animations";
 import { EVENT_TYPE } from "@/utils/types";
 import { Search } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function EventPage({
   events,
+  categories,
 }: {
   events: { data: EVENT_TYPE[] };
+  categories: string[];
 }) {
   const [selectedCategory, setSelectedCategory] = useState("");
 
   const router = useRouter();
 
-  const handleSearchChange = (value: string) => {
-    if (!value) {
-      return router.replace("/events");
-    }
-    router.replace(`/events?search=${value}`);
-  };
+  const searchParams = useSearchParams();
 
+  const search = searchParams.get("search");
+  const category = searchParams.get("category");
+
+  const handleSearchChange = useDebounce((value: string) => {
+    if (!value) {
+      router.replace(`/events${category ? `?category=${category}` : ""}`);
+    } else {
+      router.replace(
+        `/events?search=${value}${category ? `&category=${category}` : ""}`
+      );
+    }
+  }, 500);
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedCategory(e.target.value);
+    if (!e.target.value) {
+      router.replace(`/events${search ? `?search=${search}` : ""}`);
+    } else {
+      router.replace(
+        `/events?category=${e.target.value.toLocaleLowerCase()}${
+          search ? `&search=${search}` : ""
+        }`
+      );
+    }
+  };
   return (
     <motion.div
       initial="hidden"
@@ -54,15 +77,15 @@ export default function EventPage({
         </div>
         <select
           className="w-full max-w-[200px]  md:w-auto py-2.5 px-4 cursor-pointer border rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-          onChange={(e) => setSelectedCategory(e.target.value)}
+          onChange={handleCategoryChange}
           value={selectedCategory}
         >
           <option value="">All Categories</option>
-          <option value="Technology">Technology</option>
-          <option value="Art">Art</option>
-          <option value="Business">Business</option>
-          <option value="Music">Music</option>
-          <option value="Food">Food</option>
+          {categories?.map((category: string) => (
+            <option value={category} key={category}>
+              {category}
+            </option>
+          )) || []}
         </select>
       </motion.div>
 

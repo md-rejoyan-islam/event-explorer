@@ -50,3 +50,13 @@ export interface LOGIN_TYPE {
   password: string;
   isAdmin: boolean;
 }
+
+export interface ENROLLED_EVENT {
+  id: string;
+  event: Event;
+  eventId: string;
+  user: USER_TYPE;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+}

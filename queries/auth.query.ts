@@ -1,5 +1,5 @@
 import { getClient } from "@/app/libs/graphql-client";
-import { LOGIN_TYPE, REGISTER_TYPE } from "@/utils/types";
+import { LOGIN_TYPE, REGISTER_TYPE, USER_TYPE } from "@/utils/types";
 import { gql } from "graphql-request";
 
 export const userRegister = async (data: REGISTER_TYPE) => {
@@ -59,4 +59,19 @@ export const userLogin = async (data: LOGIN_TYPE) => {
       message: message,
     };
   }
+};
+
+export const getUserByEmail = async (email: string) => {
+  const client = getClient();
+  const data: { user: USER_TYPE } = await client.request(
+    gql`
+      query UserByEmail($email: String!) {
+        user: getUserByEmail(email: $email) {
+          id
+        }
+      }
+    `,
+    { email }
+  );
+  return data?.user;
 };
