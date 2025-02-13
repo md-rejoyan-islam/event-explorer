@@ -1,7 +1,10 @@
 "use client";
 
+import { ENROLLED_AN_EVENT } from "@/queries/enrolled.query";
+import { GET_EVENT_BY_ID } from "@/queries/event.query";
 import { fadeIn, slideIn, staggerChildren } from "@/utils/animations";
-import { EVENT_TYPE, SessionType } from "@/utils/types";
+import { SessionType } from "@/utils/types";
+import { useMutation, useQuery } from "@apollo/client";
 import { motion } from "framer-motion";
 import { Calendar, Clock, DollarSign, MapPin, Tag, Users } from "lucide-react";
 import Image from "next/image";
@@ -9,30 +12,46 @@ import { usePathname, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 export default function EventDetails({
-  event,
   session,
   userId,
+  eventId,
 }: {
-  event: EVENT_TYPE;
   session: SessionType;
   userId: string;
+  eventId: string;
 }) {
   const user = session?.user || null;
+
+  const { data, refetch } = useQuery(
+    GET_EVENT_BY_ID({
+      query: `title, date, time, location, category, capacity, price, image,id , organizer { name, email}  `,
+    }),
+    {
+      variables: { id: eventId, userId },
+    }
+  );
+
+  const event = { ...data?.event, isEnrolled: data?.isEnrolled };
 
   const router = useRouter();
   const pathname = usePathname();
 
-  const handleRegister = () => {
-    const data = {
-      eventId: event.id,
-      userId: userId,
-    };
-    console.log(data);
+  const [enrolledAnEvent] = useMutation(ENROLLED_AN_EVENT);
 
+  const handleRegister = async () => {
     if (!user) {
       return router.push("/login?next=" + pathname);
+    } else {
+      try {
+        await enrolledAnEvent({
+          variables: { userId, eventId: event.id },
+        });
+        refetch();
+        toast.success("You have successfully registered for the event");
+      } catch {
+        toast.error("An error occurred while registering for the event");
+      }
     }
-    toast.success("Registered for event");
   };
 
   return (
@@ -100,7 +119,7 @@ export default function EventDetails({
             </h2>
             <p className="mb-4">{event.description}</p>
             <h3 className="text-xl font-semibold mb-2">Organizer</h3>
-            <p className="mb-4">{event.organizer.name}</p>
+            <p className="mb-4">{event?.organizer?.name}</p>
             <h3 className="text-xl font-semibold mb-2">
               Additional Information
             </h3>
@@ -117,10 +136,11 @@ export default function EventDetails({
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="px-8 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full text-lg font-semibold shadow-lg transition-all duration-300"
+          className="px-8 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full text-lg font-semibold shadow-lg transition-all duration-300 disabled:opacity-50"
           onClick={handleRegister}
+          disabled={event?.isEnrolled}
         >
-          Register for Event
+          {event?.isEnrolled ? "Already Registered" : "Register for Event"}
         </motion.button>
       </motion.div>
     </motion.div>

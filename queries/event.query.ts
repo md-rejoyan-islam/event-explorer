@@ -1,59 +1,60 @@
-import { getClient } from "@/app/libs/graphql-client";
-import { EVENT_TYPE } from "@/utils/types";
-import { gql } from "graphql-request";
+import { gql } from "@apollo/client";
 
-export const getAllEvents = async ({
-  query,
-  search,
-  category,
-}: {
-  query: string;
-  search?: string;
-  category?: string;
-}) => {
-  const client = getClient();
-
-  const data: { events: { data: EVENT_TYPE[] } } = await client.request(
-    gql`
-      query AllEvents($search: String, $category: String) {
-        events: allEvents(search: $search, category: $category) {
-          data {
-            ${query}
-          }
-        }
-      }
-    `,
-    { query, search, category }
-  );
-
-  return data?.events || [];
-};
-
-export const getEventById = async (id: string, query: string) => {
-  const client = getClient();
-  const data: { event: EVENT_TYPE } = await client.request(
-    gql`
-      query EventById($id: ID!) {
-        event: getEventById(id: $id) {
+export const GET_ALL_EVENTS = ({ query }: { query: string }) => gql`
+    query AllEvents($search: String, $category: String) {
+      events: allEvents(search: $search, category: $category) {
+        data {
           ${query}
         }
       }
-    `,
-    { id, query }
-  );
-  return data?.event;
-};
+    }
+  `;
 
-export const getAllEventsCategories = async () => {
-  const client = getClient();
-  const data: { categories: { data: string[] } } = await client.request(
-    gql`
-      query AllEventsCategories {
-        categories: allEventsCategory {
-          data
+export const GET_EVENT_BY_ID = ({ query }: { query: string }) => gql`
+      query EventById($id: ID!, $userId: ID!) {
+        event: getEventById(id: $id) {
+          ${query}
         }
+        isEnrolled : checkEnrolledEvent(eventId: $id, userId: $userId)
       }
-    `
-  );
-  return data?.categories?.data || [];
-};
+    `;
+
+export const GET_ALL_EVENTS_CATEGORIES = gql`
+  query AllEventsCategories {
+    categories: allEventsCategory {
+      data
+    }
+  }
+`;
+
+export const GET_ALL_EVENTS_BY_USER_ID = ({ query }: { query: string }) => gql`
+  query  GetAllEventsByUserId($userId: ID!) {
+    events:  getAllEventsByUserId(userId: $userId) {
+        ${query}
+    }
+  }
+`;
+
+export const CREATE_AN_EVENT = gql`
+  mutation CreateEvent($eventData: eventCreate!) {
+    event: createEvent(eventData: $eventData) {
+      title
+    }
+  }
+`;
+
+export const DELETE_EVENT_BY_ID = gql`
+  mutation DeleteEventById($id: ID!) {
+    deleteEventById(id: $id) {
+      id
+    }
+  }
+`;
+
+export const UPDATE_EVENT_BY_ID = gql`
+  mutation UpdateEventById($updateData: updateDate!) {
+    updateEventById(updateData: $updateData) {
+      description
+    }
+  }
+`;

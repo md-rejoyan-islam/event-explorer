@@ -1,23 +1,16 @@
 "use server";
 
+import apolloClient from "@/lib/apollo-client";
 import { signIn } from "@/lib/auth";
+import { USER_LOGIN } from "@/queries/auth.query";
 import { LOGIN_TYPE } from "@/utils/types";
-import { gql } from "graphql-request";
-import { getClient } from "../libs/graphql-client";
 
 export async function login(data: LOGIN_TYPE) {
   try {
-    const client = getClient();
-    await client.request(
-      gql`
-        mutation UserLogin($loginData: userLoginType!) {
-          user: userLogin(loginData: $loginData) {
-            token
-          }
-        }
-      `,
-      { loginData: data }
-    );
+    await apolloClient.mutate({
+      mutation: USER_LOGIN,
+      variables: { loginData: data },
+    });
 
     await signIn("credentials", {
       email: data.email,
@@ -30,10 +23,8 @@ export async function login(data: LOGIN_TYPE) {
       message: "User logged in successfully",
     };
   } catch (error) {
-    console.log(error);
-
-    const message = (error as { response: { errors: { message: string }[] } })
-      .response.errors[0].message;
+    const message =
+      error instanceof Error ? error.message : "An error occurred";
 
     return {
       status: "error",

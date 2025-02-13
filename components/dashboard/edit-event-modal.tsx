@@ -8,85 +8,46 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { GET_EVENT_BY_ID } from "@/queries/event.query";
+import { useQuery } from "@apollo/client";
 import { useState } from "react";
-
-interface Event {
-  id: number;
-  name: string;
-  date: string;
-  description: string;
-}
+import CreateEventForm from "./admin/create-event";
 
 interface EditEventModalProps {
-  event: Event;
-  onSave: (updatedEvent: Event) => void;
+  eventId: string;
+  userId: string;
 }
 
-export function EditEventModal({ event, onSave }: EditEventModalProps) {
+export function EditEventModal({ eventId, userId }: EditEventModalProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [editedEvent, setEditedEvent] = useState(event);
 
-  const handleSave = () => {
-    onSave(editedEvent);
-    setIsOpen(false);
-  };
+  const { data: { event = {} } = {} } = useQuery(
+    GET_EVENT_BY_ID({
+      query: `title, date, time, location, category, capacity, price, image,id , organizer { name, email} , description , additionalInfo , id , status`,
+    }),
+    {
+      variables: { id: eventId, userId },
+    }
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Edit</Button>
+        <Button variant="outline" className="">
+          Edit
+        </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[525px] ">
         <DialogHeader>
-          <DialogTitle>Edit Event</DialogTitle>
+          <DialogTitle className="text-center text-xl">Edit Event</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Name
-            </Label>
-            <Input
-              id="name"
-              value={editedEvent.name}
-              onChange={(e) =>
-                setEditedEvent({ ...editedEvent, name: e.target.value })
-              }
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="date" className="text-right">
-              Date
-            </Label>
-            <Input
-              id="date"
-              type="date"
-              value={editedEvent.date}
-              onChange={(e) =>
-                setEditedEvent({ ...editedEvent, date: e.target.value })
-              }
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="description" className="text-right">
-              Description
-            </Label>
-            <Textarea
-              id="description"
-              value={editedEvent.description}
-              onChange={(e) =>
-                setEditedEvent({ ...editedEvent, description: e.target.value })
-              }
-              className="col-span-3"
-            />
-          </div>
-        </div>
-        <div className="flex justify-end">
-          <Button onClick={handleSave}>Save changes</Button>
+        <div>
+          <CreateEventForm
+            adminId={userId}
+            event={event}
+            type={"update"}
+            setIsOpen={setIsOpen}
+          />
         </div>
       </DialogContent>
     </Dialog>

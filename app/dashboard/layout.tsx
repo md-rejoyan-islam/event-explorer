@@ -9,7 +9,7 @@ export default function DashboardLayout({
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto ">
+      <main className="flex-1 overflow-y-auto max-h-screen">
         <header className="h-[60px] bg-white shadow-sm flex items-center justify-center md:hidden">
           <h1 className="text-xl  sm:text-2xl font-bold flex items-center gap-2">
             <Image

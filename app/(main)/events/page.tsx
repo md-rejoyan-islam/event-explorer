@@ -1,5 +1,9 @@
 import EventPage from "@/components/event/event-page";
-import { getAllEvents, getAllEventsCategories } from "@/queries/event.query";
+import apolloClient from "@/lib/apollo-client";
+import {
+  GET_ALL_EVENTS,
+  GET_ALL_EVENTS_CATEGORIES,
+} from "@/queries/event.query";
 
 export default async function Events({
   searchParams,
@@ -8,15 +12,24 @@ export default async function Events({
 }) {
   const { search, category } = searchParams;
 
-  const events = await getAllEvents({
-    query: `
-      title, capacity, date, location, time, category, id, image 
-      `,
-    search: (search || "") as string,
-    category: (category || "") as string,
+  // Get all events
+  const {
+    data: {
+      events: { data: eventsData = [] },
+    },
+  } = await apolloClient.query({
+    query: GET_ALL_EVENTS({
+      query: ` title, capacity, date, location, time, category, id, image `,
+    }),
+    variables: { search: search || "", category: category || "" },
   });
 
-  const categories = await getAllEventsCategories();
+  // Get all categories
+  const {
+    data: { categories: { data: categories = [] } = {} },
+  } = await apolloClient.query({
+    query: GET_ALL_EVENTS_CATEGORIES,
+  });
 
-  return <EventPage events={events} categories={categories} />;
+  return <EventPage events={eventsData} categories={categories} />;
 }

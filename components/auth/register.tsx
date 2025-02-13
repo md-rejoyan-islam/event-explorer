@@ -1,8 +1,10 @@
 "use client";
 
 import ProviderLogin from "@/components/auth/provider-login";
-import { userRegister } from "@/queries/auth.query";
+import { USER_REGISTER } from "@/queries/auth.query";
+
 import { fadeIn, slideIn } from "@/utils/animations";
+import { useMutation } from "@apollo/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -34,22 +36,30 @@ export default function Register() {
 
   const router = useRouter();
 
+  const [userRegister] = useMutation(USER_REGISTER);
+
   const onSubmit = async (data: FormData) => {
     const { name, password, email } = data;
 
-    const response = await userRegister({
-      name,
-      email,
-      password,
-      role: data.isAdmin ? "ADMIN" : "USER",
+    await userRegister({
+      variables: {
+        registerData: {
+          name,
+          email,
+          password,
+          role: data.isAdmin ? "ADMIN" : "USER",
+        },
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
+      onCompleted: () => {
+        toast.success("Account created successfully");
+        router.push("/login");
+      },
     });
-    if (response.status === "success") {
-      toast.success("Account created successfully");
-      router.push("/login");
-    } else {
-      toast.error(response.message);
-    }
   };
+
   return (
     <motion.div
       initial="hidden"

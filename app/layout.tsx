@@ -1,3 +1,4 @@
+import ApolloClientProvider from "@/components/provider/apollo-provider";
 import { Inter } from "next/font/google";
 import { ToastContainer } from "react-toastify";
 import "./globals.css";
@@ -17,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} bg-myBackground text-myText`}>
-        {children}
+        <ApolloClientProvider>{children}</ApolloClientProvider>
         <ToastContainer
           position="top-right"
           autoClose={5000}

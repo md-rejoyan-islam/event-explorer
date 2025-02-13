@@ -5,11 +5,7 @@ import { EVENT_TYPE } from "@/utils/types";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
-export default function Homepage({
-  events,
-}: {
-  events: { data: EVENT_TYPE[] };
-}) {
+export default function Homepage({ events }: { events: EVENT_TYPE[] }) {
   return (
     <motion.div
       initial="hidden"
@@ -43,10 +39,8 @@ export default function Homepage({
           Featured Events
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {events?.data?.length ? (
-            events?.data?.map((event) => (
-              <FeatureCard event={event} key={event.id} />
-            ))
+          {events?.length ? (
+            events?.map((event) => <FeatureCard event={event} key={event.id} />)
           ) : (
             <div className="text-center text-xl text-gray-600">
               No featured events available

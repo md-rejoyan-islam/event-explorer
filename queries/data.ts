@@ -1,4 +1,4 @@
-import { getClient } from "@/app/libs/graphql-client";
+import { getClient } from "@/lib/graphql-client";
 import { gql } from "graphql-request";
 
 export const getAllEvent = () => {

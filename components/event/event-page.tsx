@@ -14,7 +14,7 @@ export default function EventPage({
   events,
   categories,
 }: {
-  events: { data: EVENT_TYPE[] };
+  events: EVENT_TYPE[];
   categories: string[];
 }) {
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -93,7 +93,7 @@ export default function EventPage({
         variants={staggerChildren}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
       >
-        {events?.data.map((event) => (
+        {events?.map((event) => (
           <FeatureCard event={event} key={event.id} />
         ))}
       </motion.div>

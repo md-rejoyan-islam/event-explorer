@@ -15,6 +15,7 @@ export interface EVENT_TYPE {
   createdAt: string;
   updatedAt: string;
   organizer: USER_TYPE;
+  isEnrolled?: boolean;
 }
 
 export interface USER_TYPE {
